@@ -37,7 +37,7 @@
                     <td style="border: none; padding: 4px;"><strong>Name</strong></td>
                     <td style="border: none; padding: 4px;">: {{ $payroll->employee->employee_name }}</td>
                     <td style="border: none; padding: 4px;"><strong>Join Date</strong></td>
-                    <td style="border: none; padding: 4px;">: {{ $payroll->employee->created_at->format('d M Y') }}</td>
+                    <td style="border: none; padding: 4px;">: {{ $payroll->employee->created_at ? $payroll->employee->created_at->format('d M Y') : '-' }}</td>
                 </tr>
                 <tr>
                     <td style="border: none; padding: 4px;"><strong>Position</strong></td>
@@ -49,7 +49,7 @@
                     <td style="border: none; padding: 4px;"><strong>Daily Rate</strong></td>
                     <td style="border: none; padding: 4px;">: Rp {{ number_format($payroll->daily_rate, 0, ',', '.') }}</td>
                     <td style="border: none; padding: 4px;"><strong>Attendance</strong></td>
-                    <td style="border: none; padding: 4px; font-size: 11px;">: Hadir: {{ $payroll->hadir_count }}, Sakit/Cuti: {{ $payroll->sakit_count }}/{{ $payroll->cuti_count }}, Alpha: {{ $payroll->alpha_count }}</td>
+                    <td style="border: none; padding: 4px; font-size: 11px;">: Hadir: {{ $payroll->payroll_total_attendance }} Days</td>
                 </tr>
             </table>
         </div>
@@ -69,28 +69,28 @@
                     <td>Basic Salary</td>
                     <td class="text-right">{{ number_format($payroll->employee->employee_basic_salary, 0, ',', '.') }}</td>
                 </tr>
-                @if($payroll->thr > 0)
+                @if($payroll->transactional && $payroll->transactional->transactional_thr > 0)
                 <tr>
                     <td>THR</td>
-                    <td class="text-right">{{ number_format($payroll->thr, 0, ',', '.') }}</td>
+                    <td class="text-right">{{ number_format($payroll->transactional->transactional_thr, 0, ',', '.') }}</td>
                 </tr>
                 @endif
-                @if($payroll->target_bonus > 0)
+                @if($payroll->transactional && $payroll->transactional->transactional_bonus > 0)
                 <tr>
                     <td>Target Bonus</td>
-                    <td class="text-right">{{ number_format($payroll->target_bonus, 0, ',', '.') }}</td>
+                    <td class="text-right">{{ number_format($payroll->transactional->transactional_bonus, 0, ',', '.') }}</td>
                 </tr>
                 @endif
-                @if($payroll->overtime > 0)
+                @if($payroll->transactional && $payroll->transactional->transactional_overtime > 0)
                 <tr>
                     <td>Overtime</td>
-                    <td class="text-right">{{ number_format($payroll->overtime, 0, ',', '.') }}</td>
+                    <td class="text-right">{{ number_format($payroll->transactional->transactional_overtime, 0, ',', '.') }}</td>
                 </tr>
                 @endif
-                @if($payroll->reimbursement > 0)
+                @if($payroll->payroll_reimburse_total > 0)
                 <tr>
                     <td>Reimbursement</td>
-                    <td class="text-right">{{ number_format($payroll->reimbursement, 0, ',', '.') }}</td>
+                    <td class="text-right">{{ number_format($payroll->payroll_reimburse_total, 0, ',', '.') }}</td>
                 </tr>
                 @endif
                 <tr style="font-weight: bold; background-color: #f9f9f9;">
@@ -105,21 +105,21 @@
                     <td>PPh21 Tax Deduction</td>
                     <td class="text-right text-danger">- {{ number_format($payroll->payroll_tax, 0, ',', '.') }}</td>
                 </tr>
-                @if(0 > 0)
+                @if($payroll->transactional && $payroll->transactional->transactional_bpjs > 0)
                 <tr>
-                    <td>Alpha Deduction ({{ $payroll->alpha_count }} days)</td>
-                    <td class="text-right text-danger">- {{ number_format(0, 0, ',', '.') }}</td>
+                    <td>BPJS Deduction</td>
+                    <td class="text-right text-danger">- {{ number_format($payroll->transactional->transactional_bpjs, 0, ',', '.') }}</td>
                 </tr>
                 @endif
                 @if($payroll->payroll_total_late > 0)
                 <tr>
-                    <td>Lateness Penalty ({{ $payroll->terlambat_count }}x)</td>
+                    <td>Lateness Penalty</td>
                     <td class="text-right text-danger">- {{ number_format($payroll->payroll_total_late, 0, ',', '.') }}</td>
                 </tr>
                 @endif
                 <tr style="font-weight: bold; background-color: #f9f9f9;">
                     <td class="text-right">Total Deductions</td>
-                    <td class="text-right text-danger">- {{ number_format($payroll->payroll_tax + 0 + $payroll->payroll_total_late, 0, ',', '.') }}</td>
+                    <td class="text-right text-danger">- {{ number_format($payroll->payroll_tax + ($payroll->transactional ? $payroll->transactional->transactional_bpjs : 0) + $payroll->payroll_total_late, 0, ',', '.') }}</td>
                 </tr>
             </tbody>
         </table>
@@ -128,11 +128,11 @@
             <table>
                 <tr>
                     <td><strong>Total Gross</strong></td>
-                    <td class="text-right">Rp {{ number_format($payroll->employee->employee_basic_salary + $payroll->transactional->transactional_total, 0, ',', '.') }}</td>
+                    <td class="text-right">Rp {{ number_format($payroll->employee->employee_basic_salary + ($payroll->transactional ? $payroll->transactional->transactional_total : 0), 0, ',', '.') }}</td>
                 </tr>
                 <tr>
                     <td><strong>Total Tax & Penalties</strong></td>
-                    <td class="text-right text-danger">- Rp {{ number_format($payroll->payroll_tax + 0 + $payroll->payroll_total_late, 0, ',', '.') }}</td>
+                    <td class="text-right text-danger">- Rp {{ number_format($payroll->payroll_tax + ($payroll->transactional ? $payroll->transactional->transactional_bpjs : 0) + $payroll->payroll_total_late, 0, ',', '.') }}</td>
                 </tr>
                 <tr>
                     <td colspan="2"><hr style="border: 0; border-top: 1px solid #ccc;"></td>

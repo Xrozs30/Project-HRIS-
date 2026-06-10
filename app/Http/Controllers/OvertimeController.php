@@ -10,7 +10,7 @@ class OvertimeController extends Controller
 {
     public function index()
     {
-        $overtimes = auth()->user()->overtimes()->orderBy('overtime_date', 'desc')->get();
+        $overtimes = auth()->user()->overtimes()->orderBy('overtime_date', 'desc')->paginate(10);
         return view('overtime.index', compact('overtimes'));
     }
 

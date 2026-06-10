@@ -37,12 +37,18 @@
                     <!-- Left Column: Details -->
                     <div class="lg:col-span-7">
                         <h5 class="font-extrabold text-xl mb-6 text-gray-800 flex items-center"><i class="bi bi-person-lines-fill mr-3 text-blue-500"></i> Personal Details</h5>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                            <div>
-                                <label class="block font-bold text-xs text-gray-400 uppercase tracking-wider mb-2">Kode</label>
-                                <input type="text" name="employee_nik" value="{{ old('employee_nik', $employee->employee_nik) }}" class="w-full bg-gray-100 border border-gray-200 text-gray-800 rounded-xl px-4 py-3 focus:outline-none transition-colors cursor-not-allowed" readonly required>
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-6 mb-6">
+                            <div class="md:col-span-3">
+                                <label class="block font-bold text-xs text-gray-400 uppercase tracking-wider mb-2">Employee ID</label>
+                                <input type="text" value="{{ $employee->employee_id }}" class="w-full bg-gray-100 border border-gray-200 text-gray-800 rounded-xl px-4 py-3 focus:outline-none transition-colors cursor-not-allowed" readonly>
                             </div>
-                            <div>
+                            <div class="md:col-span-4">
+                                <label class="block font-bold text-xs text-gray-400 uppercase tracking-wider mb-2">NIK (KTP)</label>
+                                <input type="text" name="employee_nik" value="{{ old('employee_nik', $employee->employee_nik) }}" 
+                                       class="w-full bg-gray-50 border border-gray-200 text-gray-800 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white transition-colors" 
+                                       placeholder="3173040404040010" maxlength="16" required>
+                            </div>
+                            <div class="md:col-span-5">
                                 <label class="block font-bold text-xs text-gray-400 uppercase tracking-wider mb-2">Full Name</label>
                                 <input type="text" name="employee_name" value="{{ old('employee_name', $employee->employee_name) }}" class="w-full bg-gray-50 border border-gray-200 text-gray-800 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white transition-colors" required>
                             </div>

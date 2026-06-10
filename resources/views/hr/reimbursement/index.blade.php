@@ -102,6 +102,9 @@
                         </tbody>
                     </table>
                 </div>
+                <div class="px-6 py-4 border-t border-gray-100/50 bg-white">
+                    {{ $pendingReimbursements->links() }}
+                </div>
             </div>
         </div>
     </div>
@@ -173,6 +176,9 @@
                         </tbody>
                     </table>
                 </div>
+                <div class="px-6 py-4 border-t border-gray-100/50 bg-white">
+                    {{ $historyReimbursements->links() }}
+                </div>
             </div>
         </div>
     </div>
@@ -212,6 +218,9 @@
                     <table class="w-full text-left border-collapse">
                         <thead class="bg-gray-50 border-b border-gray-200">
                             <tr>
+                                <th class="py-3 px-4 font-bold text-[11px] text-gray-500 uppercase tracking-wider w-10 text-center">
+                                    <input type="checkbox" id="selectAllItems" class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 cursor-pointer">
+                                </th>
                                 <th class="py-3 px-4 font-bold text-[11px] text-gray-500 uppercase tracking-wider">Date Submitted</th>
                                 <th class="py-3 px-4 font-bold text-[11px] text-gray-500 uppercase tracking-wider">Amount</th>
                                 <th class="py-3 px-4 font-bold text-[11px] text-gray-500 uppercase tracking-wider w-64">Description</th>
@@ -219,11 +228,11 @@
                             </tr>
                         </thead>
                         <tbody id="detail-items-list" class="divide-y divide-gray-100">
-                            <tr><td colspan="4" class="text-center py-8 text-gray-400 font-medium">Loading...</td></tr>
+                            <tr><td colspan="5" class="text-center py-8 text-gray-400 font-medium">Loading...</td></tr>
                         </tbody>
                         <tfoot class="bg-gray-50 border-t border-gray-200">
                             <tr>
-                                <td colspan="1" class="py-4 px-4 text-right font-bold text-gray-600 text-sm">Total Claimed:</td>
+                                <td colspan="2" class="py-4 px-4 text-right font-bold text-gray-600 text-sm">Total Claimed:</td>
                                 <td colspan="3" class="py-4 px-4 text-green-600 font-bold text-lg" id="detail-total-amount">Rp 0</td>
                             </tr>
                         </tfoot>
@@ -239,7 +248,7 @@
                     <!-- Approve Form -->
                     <div class="bg-green-50/50 rounded-2xl p-6 border border-green-100">
                         <h6 class="font-bold text-green-800 mb-4 flex items-center"><i class="bi bi-check-circle-fill mr-2"></i> Approve Requests</h6>
-                        <form id="approve-form" method="POST" action="{{ route('hr.reimbursement.approveBatch') }}">
+                        <form id="approve-form" method="POST" action="{{ route('hr.reimbursement.approveBatch') }}" onsubmit="return attachCheckboxes('approve-form')">
                             @csrf
                             <input type="hidden" name="employee_id" id="approve_user_id">
                             <input type="hidden" name="month" id="approve_month">
@@ -249,8 +258,8 @@
                                 <label class="block text-xs font-bold text-green-700 uppercase tracking-wider mb-2">Approver Notes (Optional)</label>
                                 <textarea name="notes" class="w-full bg-white border border-green-200 text-gray-800 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500 font-medium transition-shadow" rows="2" placeholder="Add a note..."></textarea>
                             </div>
-                            <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3.5 px-6 rounded-xl shadow-sm transition-colors border-0 cursor-pointer flex justify-center items-center text-sm" onclick="return confirm('Are you sure you want to approve this month\'s claims?')">
-                                <i class="bi bi-check-circle-fill mr-2"></i> Approve All
+                            <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3.5 px-6 rounded-xl shadow-sm transition-colors border-0 cursor-pointer flex justify-center items-center text-sm" onclick="return confirm('Are you sure you want to approve the selected claims?')">
+                                <i class="bi bi-check-circle-fill mr-2"></i> Approve Selected
                             </button>
                         </form>
                     </div>
@@ -258,7 +267,7 @@
                     <!-- Reject Form -->
                     <div class="bg-red-50/50 rounded-2xl p-6 border border-red-100">
                         <h6 class="font-bold text-red-800 mb-4 flex items-center"><i class="bi bi-x-circle-fill mr-2"></i> Reject Requests</h6>
-                        <form id="reject-form" method="POST" action="{{ route('hr.reimbursement.rejectBatch') }}">
+                        <form id="reject-form" method="POST" action="{{ route('hr.reimbursement.rejectBatch') }}" onsubmit="return attachCheckboxes('reject-form')">
                             @csrf
                             <input type="hidden" name="employee_id" id="reject_user_id">
                             <input type="hidden" name="month" id="reject_month">
@@ -268,8 +277,8 @@
                                 <label class="block text-xs font-bold text-red-700 uppercase tracking-wider mb-2">Reason for Rejection <span class="text-red-500">*</span></label>
                                 <textarea name="notes" class="w-full bg-white border border-red-200 text-gray-800 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-500 font-medium transition-shadow" rows="2" placeholder="State the reason..." required></textarea>
                             </div>
-                            <button type="submit" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3.5 px-6 rounded-xl shadow-sm transition-colors border-0 cursor-pointer flex justify-center items-center text-sm" onclick="return confirm('Are you sure you want to reject this month\'s claims?')">
-                                <i class="bi bi-x-circle-fill mr-2"></i> Reject All
+                            <button type="submit" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3.5 px-6 rounded-xl shadow-sm transition-colors border-0 cursor-pointer flex justify-center items-center text-sm" onclick="return confirm('Are you sure you want to reject the selected claims?')">
+                                <i class="bi bi-x-circle-fill mr-2"></i> Reject Selected
                             </button>
                         </form>
                     </div>
@@ -331,7 +340,35 @@
     });
 
     // Handle AJAX and Data Population
+    function attachCheckboxes(formId) {
+        const form = document.getElementById(formId);
+        const checked = document.querySelectorAll('.item-checkbox:checked');
+        if (checked.length === 0) {
+            alert('Please select at least one item.');
+            return false;
+        }
+        
+        // Remove previously injected
+        form.querySelectorAll('.injected-id').forEach(el => el.remove());
+        
+        checked.forEach(cb => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'selected_ids[]';
+            input.value = cb.value;
+            input.className = 'injected-id';
+            form.appendChild(input);
+        });
+        return true;
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
+        // Select All logic
+        document.getElementById('selectAllItems')?.addEventListener('change', function() {
+            const checkboxes = document.querySelectorAll('.item-checkbox');
+            checkboxes.forEach(cb => cb.checked = this.checked);
+        });
+
         document.querySelectorAll('.view-details-btn').forEach(btn => {
             btn.addEventListener('click', async function () {
                 const userId = this.dataset.user;
@@ -365,8 +402,12 @@
 
                 // Show modal first with loading state
                 const tbody = document.getElementById('detail-items-list');
-                tbody.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-gray-400 font-medium"><div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-amber-500 mb-2"></div><br>Loading details...</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-gray-400 font-medium"><div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-amber-500 mb-2"></div><br>Loading details...</td></tr>';
                 document.getElementById('detail-total-amount').textContent = 'Rp 0';
+                
+                // Reset select all checkbox
+                const selectAll = document.getElementById('selectAllItems');
+                if(selectAll) selectAll.checked = false;
                 
                 openReimbursementModal();
 
@@ -378,7 +419,7 @@
                     let totalAmount = 0;
 
                     if (data.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-gray-400 font-medium">No items found.</td></tr>';
+                        tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-gray-400 font-medium">No items found.</td></tr>';
                     } else {
                         data.forEach(item => {
                             totalAmount += parseFloat(item.reimburse_total);
@@ -393,7 +434,21 @@
                             
                             const tr = document.createElement('tr');
                             tr.className = "hover:bg-gray-50/50 transition-colors";
+                            
+                            // Checkbox logic - only show if action section is visible
+                            let checkboxCol = '';
+                            if ((userRole === 'hr' && status === 'pending') || (userRole === 'owner' && status === 'hr_approved')) {
+                                checkboxCol = `
+                                    <td class="py-4 px-4 text-center">
+                                        <input type="checkbox" class="item-checkbox rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 cursor-pointer" value="${item.reimburse_id}">
+                                    </td>
+                                `;
+                            } else {
+                                checkboxCol = '<td class="py-4 px-4 text-center">-</td>';
+                            }
+
                             tr.innerHTML = `
+                                ${checkboxCol}
                                 <td class="py-4 px-4 text-sm text-gray-700 font-medium">${dateStr}</td>
                                 <td class="py-4 px-4 text-sm text-gray-800 font-bold">${amountStr}</td>
                                 <td class="py-4 px-4 text-sm text-gray-600 whitespace-normal break-words" style="max-width: 250px;">${item.reimburse_description}</td>
@@ -407,7 +462,7 @@
 
                 } catch (err) {
                     console.error(err);
-                    tbody.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-red-500 font-medium">Failed to load reimbursement details.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-red-500 font-medium">Failed to load reimbursement details.</td></tr>';
                 }
             });
         });

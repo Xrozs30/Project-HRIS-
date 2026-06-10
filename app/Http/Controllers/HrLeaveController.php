@@ -16,7 +16,7 @@ class HrLeaveController extends Controller
             ->where('leave_status', 'pending')
             ->with('employee')
             ->orderBy('leave_create_at', 'desc')
-            ->get();
+            ->paginate(10, ['*'], 'pending_page')->withQueryString();
 
         $historyRequests = \App\Models\LeavePermission::whereHas('employee', function ($query) use ($roleToFetch) {
                 $query->where('employee_role', $roleToFetch);
@@ -24,7 +24,7 @@ class HrLeaveController extends Controller
             ->whereIn('leave_status', ['approved', 'rejected'])
             ->with('employee')
             ->orderBy('leave_create_at', 'desc')
-            ->get();
+            ->paginate(10, ['*'], 'history_page')->withQueryString();
 
         return view('hr.leave.index', compact('pendingRequests', 'historyRequests'));
     }

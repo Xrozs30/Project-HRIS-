@@ -10,7 +10,7 @@ class PresenceController extends Controller
     public function index(Request $request)
     {
         $date = $request->input('date', date('Y-m-d'));
-        $attendance = \App\Models\Presence::whereDate('presence_date', $date)->with('employee')->get();
+        $attendance = \App\Models\Presence::whereDate('presence_date', $date)->with('employee')->paginate(10)->withQueryString();
         return view('presence.index', compact('attendance', 'date'));
     }
 

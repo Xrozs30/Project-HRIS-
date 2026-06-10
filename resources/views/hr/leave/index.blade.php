@@ -80,7 +80,7 @@
                                         @csrf
                                         <button class="bg-green-500 hover:bg-green-600 text-white font-bold py-1.5 px-3 rounded-lg text-xs shadow-sm transition-colors border-0 cursor-pointer">Approve</button>
                                     </form>
-                                    <button class="bg-white hover:bg-red-50 text-red-600 border border-red-200 font-bold py-1.5 px-3 rounded-lg text-xs shadow-sm transition-colors cursor-pointer ml-1" onclick="openRejectModal({{ $req->leave_id }})">Reject</button>
+                                    <button class="bg-white hover:bg-red-50 text-red-600 border border-red-200 font-bold py-1.5 px-3 rounded-lg text-xs shadow-sm transition-colors cursor-pointer ml-1" onclick="openRejectModal('{{ $req->leave_id }}')">Reject</button>
                                 </td>
                             </tr>
                             @empty
@@ -88,6 +88,9 @@
                             @endforelse
                         </tbody>
                     </table>
+                </div>
+                <div class="px-6 py-4 border-t border-gray-100/50 bg-white">
+                    {{ $pendingRequests->links() }}
                 </div>
             </div>
         </div>
@@ -143,6 +146,9 @@
                             @endforelse
                         </tbody>
                     </table>
+                </div>
+                <div class="px-6 py-4 border-t border-gray-100/50 bg-white">
+                    {{ $historyRequests->links() }}
                 </div>
             </div>
         </div>

@@ -10,7 +10,7 @@ class LeavePermissionController extends Controller
     {
         $requests = \App\Models\LeavePermission::where('employee_id', auth()->user()->employee_id)
             ->orderBy('leave_create_at', 'desc')
-            ->get();
+            ->paginate(10);
 
         return view('leave.index', compact('requests'));
     }

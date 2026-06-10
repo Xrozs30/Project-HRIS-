@@ -11,7 +11,7 @@ class ReimbursementController extends Controller
 {
     public function index()
     {
-        $reimbursements = Reimbursement::where('employee_id', auth()->user()->employee_id)->orderBy('reimburse_date', 'desc')->get();
+        $reimbursements = Reimbursement::where('employee_id', auth()->user()->employee_id)->orderBy('reimburse_date', 'desc')->paginate(10);
         return view('reimbursement.index', compact('reimbursements'));
     }
 

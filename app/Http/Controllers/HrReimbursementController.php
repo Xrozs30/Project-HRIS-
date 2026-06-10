@@ -22,8 +22,12 @@ class HrReimbursementController extends Controller
         )
         ->groupBy('employee_id', \Illuminate\Support\Facades\DB::raw('YEAR(reimburse_date)'), \Illuminate\Support\Facades\DB::raw('MONTH(reimburse_date)'))
         ->with('employee')
-        ->whereHas('employee', function ($q) use ($roleToFetch) {
-            $q->where('employee_role', $roleToFetch);
+        ->whereHas('employee', function ($q) use ($role) {
+            if ($role === 'hr') {
+                $q->where('employee_role', 'employee');
+            } else {
+                $q->whereIn('employee_role', ['employee', 'hr']);
+            }
         });
 
         if ($role === 'hr') {
@@ -32,7 +36,7 @@ class HrReimbursementController extends Controller
             $pendingQuery->where('reimburse_status', 'hr_approved');
         }
 
-        $pendingReimbursements = $pendingQuery->get();
+        $pendingReimbursements = $pendingQuery->paginate(10, ['*'], 'pending_page')->withQueryString();
 
         // 2. History Reimbursements
         $historyQuery = Reimbursement::select(
@@ -45,8 +49,12 @@ class HrReimbursementController extends Controller
         )
         ->groupBy('employee_id', 'reimburse_status', \Illuminate\Support\Facades\DB::raw('YEAR(reimburse_date)'), \Illuminate\Support\Facades\DB::raw('MONTH(reimburse_date)'))
         ->with('employee')
-        ->whereHas('employee', function ($q) use ($roleToFetch) {
-            $q->where('employee_role', $roleToFetch);
+        ->whereHas('employee', function ($q) use ($role) {
+            if ($role === 'hr') {
+                $q->where('employee_role', 'employee');
+            } else {
+                $q->whereIn('employee_role', ['employee', 'hr']);
+            }
         });
 
         if ($role === 'hr') {
@@ -55,7 +63,7 @@ class HrReimbursementController extends Controller
             $historyQuery->whereIn('reimburse_status', ['approved', 'rejected']);
         }
 
-        $historyReimbursements = $historyQuery->get();
+        $historyReimbursements = $historyQuery->paginate(10, ['*'], 'history_page')->withQueryString();
 
         return view('hr.reimbursement.index', compact('pendingReimbursements', 'historyReimbursements'));
     }
@@ -86,14 +94,18 @@ class HrReimbursementController extends Controller
         $userId = $request->input('employee_id');
         $month = $request->input('month');
         $year = $request->input('year');
+        $selectedIds = $request->input('selected_ids');
+
+        if (!$selectedIds || !is_array($selectedIds) || count($selectedIds) === 0) {
+            return redirect()->back()->with('error', 'No items selected for approval.');
+        }
 
         $role = auth()->user()->employee_role;
         $currentStatus = $role === 'owner' ? 'hr_approved' : 'pending';
         $newStatus = $role === 'owner' ? 'approved' : 'hr_approved';
 
         Reimbursement::where('employee_id', $userId)
-            ->whereMonth('reimburse_date', $month)
-            ->whereYear('reimburse_date', $year)
+            ->whereIn('reimburse_id', $selectedIds)
             ->where('reimburse_status', $currentStatus)
             ->update([
                 'reimburse_status' => $newStatus,
@@ -101,12 +113,11 @@ class HrReimbursementController extends Controller
 
         if ($request->filled('notes')) {
             Reimbursement::where('employee_id', $userId)
-                ->whereMonth('reimburse_date', $month)
-                ->whereYear('reimburse_date', $year)
+                ->whereIn('reimburse_id', $selectedIds)
                 ->update(['reimburse_notes' => \Illuminate\Support\Facades\DB::raw("CONCAT(COALESCE(reimburse_notes, ''), '\n', '" . addslashes($request->input('notes')) . "')")]);
         }
 
-        return redirect()->back()->with('success', 'Reimbursements approved for the month.');
+        return redirect()->back()->with('success', 'Selected reimbursements have been approved.');
     }
 
     public function rejectBatch(Request $request)
@@ -114,19 +125,23 @@ class HrReimbursementController extends Controller
         $userId = $request->input('employee_id');
         $month = $request->input('month');
         $year = $request->input('year');
+        $selectedIds = $request->input('selected_ids');
+
+        if (!$selectedIds || !is_array($selectedIds) || count($selectedIds) === 0) {
+            return redirect()->back()->with('error', 'No items selected for rejection.');
+        }
 
         $role = auth()->user()->employee_role;
         $currentStatus = $role === 'owner' ? 'hr_approved' : 'pending';
         
         Reimbursement::where('employee_id', $userId)
-            ->whereMonth('reimburse_date', $month)
-            ->whereYear('reimburse_date', $year)
+            ->whereIn('reimburse_id', $selectedIds)
             ->where('reimburse_status', $currentStatus)
             ->update([
                 'reimburse_status' => 'rejected',
                 'reimburse_notes' => $request->input('notes')
             ]);
 
-        return redirect()->back()->with('success', 'Reimbursements rejected for the month.');
+        return redirect()->back()->with('success', 'Selected reimbursements have been rejected.');
     }
 }

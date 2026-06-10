@@ -9,7 +9,7 @@ class KaryawanController extends Controller
     public function index()
     {
         $roles = auth()->user()->employee_role === 'owner' ? ['employee', 'hr'] : ['employee'];
-        $employees = \App\Models\Employee::whereIn('employee_role', $roles)->orderBy('employee_name')->get();
+        $employees = \App\Models\Employee::whereIn('employee_role', $roles)->orderBy('employee_name')->paginate(10);
         return view('karyawan.index', compact('employees'));
     }
 

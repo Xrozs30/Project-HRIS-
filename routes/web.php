@@ -71,7 +71,12 @@ Route::middleware(['auth', \App\Http\Middleware\CheckFaceEnrollment::class])->gr
                 ->take(5)
                 ->get();
 
-            return view('welcome', compact('totalEmployees', 'presentToday', 'onLeave', 'estimasiPayroll', 'latestAttendances'));
+            // Pending HR Actions
+            $pendingLeaves = \App\Models\LeavePermission::where('leave_status', 'pending')->count();
+            $pendingOvertimes = \App\Models\Overtime::where('overtime_status', 'pending')->count();
+            $pendingReimbursements = \App\Models\Reimbursement::where('reimburse_status', 'pending')->count();
+
+            return view('welcome', compact('totalEmployees', 'presentToday', 'onLeave', 'estimasiPayroll', 'latestAttendances', 'pendingLeaves', 'pendingOvertimes', 'pendingReimbursements'));
         }
         )->name('dashboard');
 

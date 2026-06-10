@@ -101,7 +101,12 @@
                     <tr class="hover:bg-gray-50/50 transition-colors">
                         <td class="py-4 px-6 font-bold text-sm text-gray-800">{{ $payroll->payroll_periode_month }} {{ $payroll->payroll_periode_year }}</td>
                         <td class="py-4 px-6 text-right text-gray-500 font-medium">Rp {{ number_format($payroll->employee->employee_basic_salary, 0, ',', '.') }}</td>
-                        <td class="py-4 px-6 text-right text-green-600 font-medium">+ Rp {{ number_format($payroll->transactional ? $payroll->transactional->transactional_total : 0, 0, ',', '.') }}</td>
+                        @php
+                            $transTotal = $payroll->transactional ? $payroll->transactional->transactional_total : 0;
+                            $transColor = $transTotal >= 0 ? 'text-green-600' : 'text-red-500';
+                            $transSign = $transTotal >= 0 ? '+' : '-';
+                        @endphp
+                        <td class="py-4 px-6 text-right {{ $transColor }} font-medium">{{ $transSign }} Rp {{ number_format(abs($transTotal), 0, ',', '.') }}</td>
                         <td class="py-4 px-6 text-right text-red-500 font-medium">- Rp {{ number_format($payroll->payroll_tax + $payroll->payroll_total_late, 0, ',', '.') }}</td>
                         <td class="py-4 px-6 text-right font-bold text-gray-800">Rp {{ number_format($payroll->payroll_net_salary, 0, ',', '.') }}</td>
                         <td class="py-4 px-6 text-right">

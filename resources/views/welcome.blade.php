@@ -42,50 +42,116 @@
     </div>
 </div>
 
-<div class="mt-8">
-    <div class="bg-white border-0 shadow-sm rounded-2xl p-6">
-        <h5 class="font-bold text-lg text-gray-800 mb-6">Latest Attendance Today</h5>
-        <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="bg-gray-50/80">
-                        <th class="py-3 px-4 font-bold text-[11px] text-gray-500 uppercase tracking-wider rounded-l-xl">Employee</th>
-                        <th class="py-3 px-4 font-bold text-[11px] text-gray-500 uppercase tracking-wider">Division</th>
-                        <th class="py-3 px-4 font-bold text-[11px] text-gray-500 uppercase tracking-wider">Time In</th>
-                        <th class="py-3 px-4 font-bold text-[11px] text-gray-500 uppercase tracking-wider rounded-r-xl">Status</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-100/50">
-                    @forelse ($latestAttendances as $attendance)
-                    <tr class="hover:bg-gray-50/50 transition-colors group">
-                        <td class="py-3 px-4">
-                            <div class="flex items-center">
-                                <img src="https://ui-avatars.com/api/?name={{ urlencode($attendance->employee->employee_name) }}&background=random" class="rounded-full mr-3 w-9 h-9 shadow-sm">
-                                <div>
-                                    <div class="font-bold text-sm text-gray-800">{{ $attendance->employee->employee_name }}</div>
-                                    <div class="text-xs text-gray-400 mt-0.5">{{ $attendance->employee->employee_id }}</div>
+<div class="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Pending Actions Widget -->
+    <div class="lg:col-span-1">
+        <div class="bg-white border-0 shadow-sm rounded-2xl p-6 h-full">
+            <h5 class="font-bold text-lg text-gray-800 mb-6">Needs Attention</h5>
+            
+            <div class="flex flex-col gap-4">
+                <!-- Leave -->
+                <a href="{{ route('hr.leave.index') }}" class="block no-underline">
+                    <div class="flex items-center p-3 rounded-xl hover:bg-gray-50 transition-colors border border-gray-100">
+                        <div class="w-10 h-10 bg-yellow-50 text-yellow-500 rounded-lg flex items-center justify-center mr-4">
+                            <i class="bi bi-envelope-paper"></i>
+                        </div>
+                        <div class="flex-1">
+                            <div class="font-bold text-sm text-gray-800">Leave Requests</div>
+                            <div class="text-xs text-gray-500">Pending Approvals</div>
+                        </div>
+                        @if($pendingLeaves > 0)
+                            <div class="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">{{ $pendingLeaves }}</div>
+                        @else
+                            <div class="text-gray-300"><i class="bi bi-check-circle-fill"></i></div>
+                        @endif
+                    </div>
+                </a>
+
+                <!-- Overtime -->
+                <a href="{{ route('hr.overtime.index') }}" class="block no-underline">
+                    <div class="flex items-center p-3 rounded-xl hover:bg-gray-50 transition-colors border border-gray-100">
+                        <div class="w-10 h-10 bg-blue-50 text-blue-500 rounded-lg flex items-center justify-center mr-4">
+                            <i class="bi bi-clock-history"></i>
+                        </div>
+                        <div class="flex-1">
+                            <div class="font-bold text-sm text-gray-800">Overtime</div>
+                            <div class="text-xs text-gray-500">Pending Approvals</div>
+                        </div>
+                        @if($pendingOvertimes > 0)
+                            <div class="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">{{ $pendingOvertimes }}</div>
+                        @else
+                            <div class="text-gray-300"><i class="bi bi-check-circle-fill"></i></div>
+                        @endif
+                    </div>
+                </a>
+
+                <!-- Reimbursement -->
+                <a href="{{ route('hr.reimbursement.index') }}" class="block no-underline">
+                    <div class="flex items-center p-3 rounded-xl hover:bg-gray-50 transition-colors border border-gray-100">
+                        <div class="w-10 h-10 bg-green-50 text-green-500 rounded-lg flex items-center justify-center mr-4">
+                            <i class="bi bi-receipt"></i>
+                        </div>
+                        <div class="flex-1">
+                            <div class="font-bold text-sm text-gray-800">Reimbursements</div>
+                            <div class="text-xs text-gray-500">Pending Approvals</div>
+                        </div>
+                        @if($pendingReimbursements > 0)
+                            <div class="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">{{ $pendingReimbursements }}</div>
+                        @else
+                            <div class="text-gray-300"><i class="bi bi-check-circle-fill"></i></div>
+                        @endif
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Latest Attendance -->
+    <div class="lg:col-span-2">
+        <div class="bg-white border-0 shadow-sm rounded-2xl p-6 h-full">
+            <h5 class="font-bold text-lg text-gray-800 mb-6">Latest Attendance Today</h5>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-50/80">
+                            <th class="py-3 px-4 font-bold text-[11px] text-gray-500 uppercase tracking-wider rounded-l-xl">Employee</th>
+                            <th class="py-3 px-4 font-bold text-[11px] text-gray-500 uppercase tracking-wider">Division</th>
+                            <th class="py-3 px-4 font-bold text-[11px] text-gray-500 uppercase tracking-wider">Time In</th>
+                            <th class="py-3 px-4 font-bold text-[11px] text-gray-500 uppercase tracking-wider rounded-r-xl">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100/50">
+                        @forelse ($latestAttendances as $attendance)
+                        <tr class="hover:bg-gray-50/50 transition-colors group">
+                            <td class="py-3 px-4">
+                                <div class="flex items-center">
+                                    <img src="https://ui-avatars.com/api/?name={{ urlencode($attendance->employee->employee_name) }}&background=random" class="rounded-full mr-3 w-9 h-9 shadow-sm">
+                                    <div>
+                                        <div class="font-bold text-sm text-gray-800">{{ $attendance->employee->employee_name }}</div>
+                                        <div class="text-xs text-gray-400 mt-0.5">{{ $attendance->employee->employee_id }}</div>
+                                    </div>
                                 </div>
-                            </div>
-                        </td>
-                        <td class="py-3 px-4 text-sm font-semibold text-gray-800">{{ $attendance->employee->position->position_type ?? '-' }}</td>
-                        <td class="py-3 px-4 text-sm font-semibold text-gray-800">{{ $attendance->presence_time_in }} WIB</td>
-                        <td class="py-3 px-4">
-                            @if(strtolower($attendance->presence_status) == 'tepat waktu' || strtolower($attendance->presence_status) == 'on time' || strtolower($attendance->presence_status) == 'hadir')
-                                <span class="bg-green-50 text-green-600 px-3 py-1 rounded-full text-xs font-bold inline-block">{{ $attendance->presence_status }}</span>
-                            @elseif(strtolower($attendance->presence_status) == 'terlambat' || strtolower($attendance->presence_status) == 'late')
-                                <span class="bg-red-50 text-red-600 px-3 py-1 rounded-full text-xs font-bold inline-block">{{ $attendance->presence_status }}</span>
-                            @else
-                                <span class="bg-yellow-50 text-yellow-600 px-3 py-1 rounded-full text-xs font-bold inline-block">{{ $attendance->presence_status }}</span>
-                            @endif
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="4" class="text-center py-8 text-gray-400 text-sm">No attendance records yet today.</td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
+                            </td>
+                            <td class="py-3 px-4 text-sm font-semibold text-gray-800">{{ $attendance->employee->position->position_type ?? '-' }}</td>
+                            <td class="py-3 px-4 text-sm font-semibold text-gray-800">{{ $attendance->presence_time_in }} WIB</td>
+                            <td class="py-3 px-4">
+                                @if(strtolower($attendance->presence_status) == 'tepat waktu' || strtolower($attendance->presence_status) == 'on time' || strtolower($attendance->presence_status) == 'hadir')
+                                    <span class="bg-green-50 text-green-600 px-3 py-1 rounded-full text-xs font-bold inline-block">{{ $attendance->presence_status }}</span>
+                                @elseif(strtolower($attendance->presence_status) == 'terlambat' || strtolower($attendance->presence_status) == 'late')
+                                    <span class="bg-red-50 text-red-600 px-3 py-1 rounded-full text-xs font-bold inline-block">{{ $attendance->presence_status }}</span>
+                                @else
+                                    <span class="bg-yellow-50 text-yellow-600 px-3 py-1 rounded-full text-xs font-bold inline-block">{{ $attendance->presence_status }}</span>
+                                @endif
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="4" class="text-center py-8 text-gray-400 text-sm">No attendance records yet today.</td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>

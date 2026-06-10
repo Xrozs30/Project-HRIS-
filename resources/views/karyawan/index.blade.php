@@ -80,5 +80,8 @@
                 </tbody>
             </table>
         </div>
+        <div class="px-6 py-4 border-t border-gray-100/50 bg-white">
+            {{ $employees->links() }}
+        </div>
     </div>
 @endsection

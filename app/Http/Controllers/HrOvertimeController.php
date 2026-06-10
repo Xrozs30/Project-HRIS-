@@ -11,7 +11,7 @@ class HrOvertimeController extends Controller
     {
         $roleToFetch = auth()->user()->employee_role === 'owner' ? 'hr' : 'employee';
 
-        $baseQuery = function ($status) use ($roleToFetch) {
+        $baseQuery = function ($status, $pageName) use ($roleToFetch) {
             $q = \App\Models\Overtime::whereHas('employee', function ($query) use ($roleToFetch) {
                     $query->where('employee_role', $roleToFetch);
                 })
@@ -19,11 +19,11 @@ class HrOvertimeController extends Controller
                 ->orderBy('overtime_create_at', 'desc');
             if ($status === 'pending') $q->where('overtime_status', 'pending');
             else $q->whereIn('overtime_status', ['approved', 'rejected']);
-            return $q->get();
+            return $q->paginate(10, ['*'], $pageName)->withQueryString();
         };
 
-        $pendingOvertimes = $baseQuery('pending');
-        $historyOvertimes = $baseQuery('history');
+        $pendingOvertimes = $baseQuery('pending', 'pending_page');
+        $historyOvertimes = $baseQuery('history', 'history_page');
 
         // Attach attendance data
         foreach ($pendingOvertimes as $ot) {

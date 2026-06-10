@@ -352,7 +352,7 @@ class PayrollController extends Controller
 
     public function generatePDF($month, $year, Request $request)
     {
-        $query = \App\Models\Payroll::with('employee')
+        $query = \App\Models\Payroll::with(['employee', 'transactional'])
             ->where('payroll_periode_month', $month)
             ->where('payroll_periode_year', $year);
             
@@ -367,6 +367,22 @@ class PayrollController extends Controller
 
         if ($payrolls->isEmpty()) {
             return back()->with('error', 'No payroll records found or not yet approved.');
+        }
+
+        $startDate = \Carbon\Carbon::parse("1 $month $year");
+        $endDate = $startDate->copy()->endOfMonth();
+        
+        $hke = 0;
+        for ($date = $startDate->copy(); $date->lte($endDate); $date->addDay()) {
+            if (!$date->isWeekend()) {
+                $hke++;
+            }
+        }
+
+        foreach ($payrolls as $payroll) {
+            $payroll->hke = $hke;
+            $basic = $payroll->employee->employee_basic_salary ?? 0;
+            $payroll->daily_rate = $hke > 0 ? $basic / $hke : 0;
         }
 
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('payroll.pdf', compact('payrolls', 'month', 'year'))
